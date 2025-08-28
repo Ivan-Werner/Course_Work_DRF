@@ -1,5 +1,3 @@
-from dataclasses import field
-
 from rest_framework.serializers import ModelSerializer
 from habits.models import Habit
 from habits.validators import (RewardValidator,
@@ -7,6 +5,7 @@ from habits.validators import (RewardValidator,
                                RelatedHabitValidator,
                                PleasantHabitValidator,
                                RegularityValidator,)
+
 
 class HabitSerializer(ModelSerializer):
     class Meta:

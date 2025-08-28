@@ -1,7 +1,5 @@
 from django.conf import settings
-from users.models import User
 from django.db import models
-from rest_framework.fields import DateTimeField
 
 
 class Habit(models.Model):
