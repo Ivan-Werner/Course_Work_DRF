@@ -21,6 +21,7 @@ drf-yasg = "^1.21.10"
 redis = "^6.4.0"
 requests = "^2.32.5"
 coverage = "^7.10.5"
+black = "^25.1.0"
 
 
 [build-system]

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 
 from users.models import User
@@ -14,4 +14,3 @@ class UserViewSet(viewsets.ModelViewSet):
         user = serializer.save(is_active=True)
         user.set_password(user.password)
         user.save()
-
