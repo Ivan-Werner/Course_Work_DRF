@@ -67,3 +67,39 @@ jobs:
         run: |
           docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/app:${{ github.sha }} ${{ secrets.DOCKER_HUB_USERNAME }}/app:latest
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/app:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Check out
+        uses: actions/checkout@v3
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v2
+        with:
+          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          envkey_NAME: ${{ secrets.NAME }}
+          envkey_USER: ${{ secrets.USER }}
+          envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          envkey_DB_HOST: ${{ secrets.DB_HOST }}
+          envkey_CELERY_BROKER_URL: ${{ secrets.CELERY_BROKER_URL }}
+          envkey_CELERY_RESULT_BACKEND: ${{ secrets.CELERY_RESULT_BACKEND }}
+          envkey_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+
+      - name: Deploy to server
+        run: |
+          scp -v -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app 
+          scp -v -o StrictHostKeyChecking=no nginx.conf ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app 
+          scp -v -o StrictHostKeyChecking=no .env ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app 
+          ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }} << EOF
+          cd /app 
+          docker compose pull || sudo docker compose pull
+          docker compose down --remove-orphans || true || sudo docker compose down --remove-orphans
+          docker compose up -d --force-recreate || sudo docker compose up -d --force-recreate
+          EOF
