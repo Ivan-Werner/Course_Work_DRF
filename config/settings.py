@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -174,3 +175,11 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        }
+    }
