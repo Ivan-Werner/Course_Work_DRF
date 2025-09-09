@@ -103,4 +103,3 @@ jobs:
           docker compose down --remove-orphans || true || sudo docker compose down --remove-orphans
           docker compose up -d --force-recreate || sudo docker compose up -d --force-recreate
           EOF
-          
