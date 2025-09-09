@@ -90,36 +90,9 @@ jobs:
           envkey_CELERY_BROKER_URL: ${{ secrets.CELERY_BROKER_URL }}
           envkey_CELERY_RESULT_BACKEND: ${{ secrets.CELERY_RESULT_BACKEND }}
           envkey_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          envkey_SSH_KEY: ${{ secrets.SSH_KEY }}
+          envkey_SERVER_IP: ${{ secrets.SERVER_IP }}
+          envkey_USER_NAME: ${{ secrets.USER_NAME }}
 
 
-#      - name: Deploy to server
-#        run: |
-#          scp -v -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app
-#          scp -v -o StrictHostKeyChecking=no nginx.conf ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app
-#          scp -v -o StrictHostKeyChecking=no .env ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app
-#          ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }} << EOF
-#          cd /app
-#          docker compose pull || sudo docker compose pull
-#          docker compose down --remove-orphans || true || sudo docker compose down --remove-orphans
-#          docker compose up -d --force-recreate || sudo docker compose up -d --force-recreate
-#          EOF
 
-      - name: Deploy to server
-        env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          USER_NAME: ${{ secrets.USER_NAME }}
-        run: |
-        # Копируем все необходимые файлы
-          scp -o StrictHostKeyChecking=no docker-compose.yml $USER_NAME@$SERVER_IP:/app/
-          scp -o StrictHostKeyChecking=no Dockerfile $USER_NAME@$SERVER_IP:/app/
-          scp -o StrictHostKeyChecking=no requirements.txt $USER_NAME@$SERVER_IP:/app/
-          scp -o StrictHostKeyChecking=no -r habits/ USER_NAME@$SERVER_IP:/app/
-          scp -o StrictHostKeyChecking=no -r users/ $USER_NAME@$SERVER_IP:/app/
-          scp -o StrictHostKeyChecking=no manage.py $USER_NAME@$SERVER_IP:/app/
-
-         # Запускаем деплой
-          ssh -o StrictHostKeyChecking=no $USER_NAME@$SERVER_IP "
-          cd /app &&
-          sudo docker-compose down &&
-          sudo docker-compose up -d --build
