@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -12,14 +14,15 @@ class HabitTestCase(APITestCase):
         self.habit = Habit.objects.create(
             place="парк",
             time="2024-08-24T08:00:00",
+            # time=timezone.now().replace(hour=12, minute=0, second=0, microsecond=0),
             action="приседания",
             is_pleasant=False,
             frequency_number=1,
             frequency_unit="days",
             reward="съесть яблоко",
-            duration="120",
+            duration=timedelta(minutes=2),
             is_public=True,
-            user=self.user,
+            user=self.user
         )
         self.client.force_authenticate(user=self.user)
 
