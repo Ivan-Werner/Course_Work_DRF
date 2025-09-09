@@ -1,4 +1,4 @@
-from datetime import timedelta, timezone
+from datetime import timedelta
 
 from django.urls import reverse
 from rest_framework import status
