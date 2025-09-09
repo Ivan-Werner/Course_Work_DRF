@@ -92,14 +92,34 @@ jobs:
           envkey_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
 
+#      - name: Deploy to server
+#        run: |
+#          scp -v -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app
+#          scp -v -o StrictHostKeyChecking=no nginx.conf ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app
+#          scp -v -o StrictHostKeyChecking=no .env ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app
+#          ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }} << EOF
+#          cd /app
+#          docker compose pull || sudo docker compose pull
+#          docker compose down --remove-orphans || true || sudo docker compose down --remove-orphans
+#          docker compose up -d --force-recreate || sudo docker compose up -d --force-recreate
+#          EOF
+
       - name: Deploy to server
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          USER_NAME: ${{ secrets.USER_NAME }}
         run: |
-          scp -v -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app 
-          scp -v -o StrictHostKeyChecking=no nginx.conf ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app 
-          scp -v -o StrictHostKeyChecking=no .env ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }}:/app 
-          ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.SERVER_IP }} << EOF
-          cd /app 
-          docker compose pull || sudo docker compose pull
-          docker compose down --remove-orphans || true || sudo docker compose down --remove-orphans
-          docker compose up -d --force-recreate || sudo docker compose up -d --force-recreate
-          EOF
+        # Копируем все необходимые файлы
+          scp -o StrictHostKeyChecking=no docker-compose.yml $SERVER_USER@$SERVER_IP:/app/
+          scp -o StrictHostKeyChecking=no Dockerfile $SERVER_USER@$SERVER_IP:/app/
+          scp -o StrictHostKeyChecking=no requirements.txt $SERVER_USER@$SERVER_IP:/app/
+          scp -o StrictHostKeyChecking=no -r habits/ $SERVER_USER@$SERVER_IP:/app/
+          scp -o StrictHostKeyChecking=no -r users/ $SERVER_USER@$SERVER_IP:/app/
+          scp -o StrictHostKeyChecking=no manage.py $SERVER_USER@$SERVER_IP:/app/
+
+         # Запускаем деплой
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
+          cd /app &&
+          sudo docker-compose down &&
+          sudo docker-compose up -d --build
